@@ -87,8 +87,25 @@ abstract class Model extends Query
 
     public function save()
     {
-        // TODO: Save data
+        if (!is_null($this->{$this->primary_key})) {
+            # update
+        } else {
+            $this->insert();
+        }
     }
+
+    public function insert() {
+        $column = implode(', ', array_map(function($col){ return "`{$col}`"; }, array_keys($this->properties)));
+        $values = implode(', ', array_map(function($col){ return ":{$col}"; }, array_keys($this->properties)));
+        $exe_arr = [];
+        foreach ($this->properties as $key => $value) {
+            $exe_arr[':' . $key] = $value;
+        }
+        $stmt = $this->connection->prepare("insert into `{$this->table}` ({$column}) values ($values)");
+        return $stmt->execute($exe_arr);
+    }
+
+    public function update() {}
 
     public function delete()
     {

@@ -1,0 +1,18 @@
+{
+    "name": "idoalit/sinom",
+    "description": "A litle library for litle project like \"sinom\"",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Idoalit\\Sinom\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Waris Agung Widodo",
+            "email": "ido.alit@gmail.com"
+        }
+    ],
+    "require": {}
+}

@@ -196,6 +196,7 @@ class Query
 
     private function buildWhere()
     {
+        if (is_null($this->where) || empty($this->where)) return '';
         $where = '';
         foreach ($this->where as $key => $item) {
             $sparator = ' ' . $key . ' ';

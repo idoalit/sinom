@@ -80,6 +80,11 @@ class Query
         return $this;
     }
 
+    function _isNull($column) {
+        $this->where['and'][] = [$column, 'is null', null];
+        return $this;
+    }
+
     function _orderBy($column, $order = 'asc')
     {
         $this->order[] = [$column, $order];
@@ -154,6 +159,7 @@ class Query
         }
         // execute sql
         $sth->execute();
+        // $sth->debugDumpParams();
         return $sth;
     }
 
@@ -202,6 +208,9 @@ class Query
             $sparator = ' ' . $key . ' ';
             if ($where !== '') $where .= $sparator;
             $where .= implode($sparator, array_map(function ($where) {
+
+                if ($where[1] === 'is null') return "`$where[0]` is null";
+
                 $this->where_value[] = $where[2];
                 return '`' . $where[0] . '` ' . $where[1] . ' ?';
             }, $item));

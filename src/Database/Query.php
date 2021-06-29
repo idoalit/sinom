@@ -132,6 +132,11 @@ class Query
         return $this->_first();
     }
 
+    function _all($columns = [])
+    {
+        return $this->_get($columns);
+    }
+
     function _sql() {
         // build sql
         $this->build();

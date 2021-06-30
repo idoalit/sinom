@@ -107,11 +107,13 @@ abstract class Model extends Query
     }
 
     public function update() {
-        $set_str = '';
+        $set_arr = [];
         foreach ($this->properties as $col => $val) {
             if ($col === $this->primary_key) continue;
-            $set_str .= "`$col` = :$col";
+            $set_arr[] = "`$col` = :$col";
         }
+
+        $set_str = implode(', ', $set_arr);
 
         $exe_arr = [];
         foreach ($this->properties as $key => $value) {

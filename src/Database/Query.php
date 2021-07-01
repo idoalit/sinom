@@ -159,7 +159,7 @@ class Query
         }
         // execute sql
         $sth->execute();
-        // $sth->debugDumpParams();
+        $sth->debugDumpParams();
         return $sth;
     }
 
@@ -209,10 +209,12 @@ class Query
             if ($where !== '') $where .= $sparator;
             $where .= implode($sparator, array_map(function ($where) {
 
-                if ($where[1] === 'is null') return "`$where[0]` is null";
+                $column = implode('.', array_map(function ($item) { return "`$item`"; }, explode('.', $where[0])));
+
+                if ($where[1] === 'is null') return "$column is null";
 
                 $this->where_value[] = $where[2];
-                return '`' . $where[0] . '` ' . $where[1] . ' ?';
+                return $column . ' ' . $where[1] . ' ?';
             }, $item));
         }
 

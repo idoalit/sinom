@@ -159,7 +159,7 @@ class Query
         }
         // execute sql
         $sth->execute();
-        $sth->debugDumpParams();
+        // $sth->debugDumpParams();
         return $sth;
     }
 

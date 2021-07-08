@@ -118,6 +118,16 @@ class Query
         return $this->rows;
     }
 
+    function _count($column = '*')
+    {
+        // reset all column
+        $this->columns = [];
+        $this->_select(['count' => 'count('.$column.')']);
+        // execute
+        $result = $this->_first();
+        return $result->count();
+    }
+
     function _first()
     {
         // set limit just one

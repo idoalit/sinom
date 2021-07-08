@@ -130,7 +130,10 @@ abstract class Model extends Query
 
     public function delete()
     {
-        // TODO: Delete data
+        $stmt = $this->connection->prepare("delete from `$this->table` where `$this->primary_key` = :id");
+        $exe = $stmt->execute([':id' => $this->{$this->primary_key}]);
+        if($this->debug) $stmt->debugDumpParams();
+        return $exe;
     }
 
     public function toArray()

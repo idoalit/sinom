@@ -133,10 +133,10 @@ class Query
     {
         // reset all column
         $this->columns = [];
-        $this->_select(['count('.$column.')' => 'count']);
+        $this->_select(['count('.$column.')' => 'total']);
         // execute
         $result = $this->_first();
-        return $result->count;
+        return $result->total;
     }
 
     function _first()
@@ -173,6 +173,7 @@ class Query
     function _debug(bool $enabled = true)
     {
         $this->debug = $enabled;
+        return $this;
     }
 
     private function execute()
@@ -212,7 +213,7 @@ class Query
             $key = str_replace('`', '', $key);
 
             // it's a function
-            if(strpos($key, '(')) return $key . '` AS `' . $item . '`';
+            if(strpos($key, '(')) return $key . ' AS `' . $item . '`';
             
             // normal column
             return '`' . $key . '` AS `' . $item . '`';

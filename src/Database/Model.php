@@ -37,7 +37,6 @@ abstract class Model extends Query
     protected $primary_key = 'id';
     protected $key_type = 'int';
     protected $properties = [];
-    private $debug = false;
 
     public function __construct($connection = null, $id = null)
     {
@@ -219,10 +218,5 @@ abstract class Model extends Query
     public function setKeyType(string $key_type): void
     {
         $this->key_type = $key_type;
-    }
-
-    public function debug(bool $enabled = true)
-    {
-        $this->debug = $enabled;
     }
 }

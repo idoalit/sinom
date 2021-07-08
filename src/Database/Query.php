@@ -36,6 +36,7 @@ class Query
     private $offset = 0;
     private $sql;
     private $rows;
+    protected $debug = false;
 
     function _select($columns)
     {
@@ -132,10 +133,10 @@ class Query
     {
         // reset all column
         $this->columns = [];
-        $this->_select(['count' => 'count('.$column.')']);
+        $this->_select(['count('.$column.')' => 'count']);
         // execute
         $result = $this->_first();
-        return $result->count();
+        return $result->count;
     }
 
     function _first()
@@ -168,6 +169,11 @@ class Query
         // return it
         return $this->sql;
     }
+    
+    function _debug(bool $enabled = true)
+    {
+        $this->debug = $enabled;
+    }
 
     private function execute()
     {
@@ -179,7 +185,7 @@ class Query
         }
         // execute sql
         $sth->execute();
-        // $sth->debugDumpParams();
+        if($this->debug) $sth->debugDumpParams();
         return $sth;
     }
 
@@ -199,11 +205,16 @@ class Query
     private function buildColumn()
     {
         if (is_null($this->columns) || empty($this->columns)) return '*';
-        if ($this->columns[0] === '*') return '*';
+        if ($this->columns[0] ?? '' === '*') return '*';
         return implode(', ', array_map(function ($item, $key) {
             $item = str_replace('`', '', $item);
             if (is_int($key)) return '`' . $item . '`';
             $key = str_replace('`', '', $key);
+
+            // it's a function
+            if(strpos($key, '(')) return $key . '` AS `' . $item . '`';
+            
+            // normal column
             return '`' . $key . '` AS `' . $item . '`';
         }, $this->columns, array_keys($this->columns)));
     }

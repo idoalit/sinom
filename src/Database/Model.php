@@ -37,6 +37,7 @@ abstract class Model extends Query
     protected $primary_key = 'id';
     protected $key_type = 'int';
     protected $properties = [];
+    private $debug = false;
 
     public function __construct($connection = null, $id = null)
     {
@@ -103,7 +104,9 @@ abstract class Model extends Query
         }
 
         $stmt = $this->connection->prepare("insert into `$this->table` ($column) values ($values)");
-        return $stmt->execute($exe_arr);
+        $exe = $stmt->execute($exe_arr);
+        if($this->debug) $stmt->debugDumpParams();
+        return $exe;
     }
 
     public function update() {
@@ -121,7 +124,9 @@ abstract class Model extends Query
         }
 
         $stmt = $this->connection->prepare("update `$this->table` set $set_str where `$this->primary_key` = :$this->primary_key");
-        return $stmt->execute($exe_arr);
+        $exe = $stmt->execute($exe_arr);
+        if($this->debug) $stmt->debugDumpParams();
+        return $exe;
     }
 
     public function delete()
@@ -214,5 +219,10 @@ abstract class Model extends Query
     public function setKeyType(string $key_type): void
     {
         $this->key_type = $key_type;
+    }
+
+    public function debug(bool $enabled = true)
+    {
+        $this->debug = $enabled;
     }
 }

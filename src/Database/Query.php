@@ -30,6 +30,7 @@ class Query
     private $join;
     private $where;
     private $where_value = [];
+    private $group;
     private $order;
     private $limit = 10;
     private $offset = 0;
@@ -82,6 +83,15 @@ class Query
 
     function _isNull($column) {
         $this->where['and'][] = [$column, 'is null', null];
+        return $this;
+    }
+
+    function _groupBy($columns) {
+        if (is_array($columns)) {
+            $this->columns = $columns;
+            return $this;
+        }
+        $this->group = func_get_args();
         return $this;
     }
 
@@ -179,6 +189,7 @@ class Query
         $this->sql .= ' from `' . $this->table . '` ';
         $this->sql .= $this->buildJoin();
         if (($where = $this->buildWhere()) !== '') $this->sql .= ' where ' . $where;
+        if (($group = $this->buildGroup()) !== '') $this->sql .= ' group by ' . $group;
         if (($order = $this->buildOrder()) !== '') $this->sql .= ' order by ' . $order;
         $this->sql .= ' limit ' . $this->limit;
         $this->sql .= ' offset ' . $this->offset;
@@ -229,6 +240,12 @@ class Query
         }
 
         return $where;
+    }
+
+    private function buildGroup()
+    {
+        if (is_null($this->group) || empty($this->group)) return '';
+        return implode(', ', $this->group);
     }
 
     private function buildOrder()

@@ -213,7 +213,7 @@ class Query
             $key = str_replace('`', '', $key);
 
             // it's a function
-            if(strpos($key, '(')) return $key . ' AS `' . $item . '`';
+            if(strpos($key, '(') !== false) return $key . ' AS `' . $item . '`';
             
             // normal column
             return '`' . $key . '` AS `' . $item . '`';

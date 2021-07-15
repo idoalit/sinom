@@ -26,6 +26,22 @@ namespace Idoalit\Sinom\Database;
 
 use Idoalit\Sinom\Supports\Text;
 
+/**
+ * Class Model
+ * @package Idoalit\Sinom\Database
+ * @method static Model find($id)
+ * @method static Model select($columns)
+ * @method static Model join($table, $first, $operator, $second, $type = 'inner')
+ * @method static Model where($column, $operator = '=', $value = null)
+ * @method static Model isNull($column)
+ * @method static Model groupBy($columns)
+ * @method static Model orderBy($column, $order = 'asc')
+ *
+ * @method count($column = '*')
+ * @method get()
+ * @method first()
+ * @method all($columns = [])
+ */
 abstract class Model extends Query
 {
     /**

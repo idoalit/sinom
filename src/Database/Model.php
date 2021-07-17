@@ -92,6 +92,16 @@ abstract class Model extends Query
         return null;
     }
 
+    public function __serialize(): array
+    {
+        return $this->properties;
+    }
+
+    public function __unserialize(array $data): void
+    {
+        $this->properties = $data;
+    }
+
     private function load($id) {
         $query = $this->connection->query("SELECT * FROM $this->table WHERE $this->primary_key = $id");
         if ($query->rowCount() < 1) return null;

@@ -131,6 +131,7 @@ abstract class Model extends Query
         $stmt = $this->connection->prepare("insert into `$this->table` ($column) values ($values)");
         $exe = $stmt->execute($exe_arr);
         if($this->debug) $stmt->debugDumpParams();
+        if($exe) $this->{$this->primary_key} = $this->connection->lastInsertId();
         return $exe;
     }
 

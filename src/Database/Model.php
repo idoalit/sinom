@@ -104,12 +104,22 @@ abstract class Model extends Query
 
     public function __serialize(): array
     {
-        return $this->properties;
+        return [
+            'connection_class' => $this->connection_class, 
+            'table' => $this->table, 
+            'primary_key' => $this->primary_key, 
+            'key_type' => $this->key_type, 
+            'properties' => $this->properties
+        ];
     }
 
     public function __unserialize(array $data): void
     {
-        $this->properties = $data;
+        $this->connection_class = $data['connection_class'];
+        $this->table = $data['table'];
+        $this->primary_key = $data['primary_key'];
+        $this->key_type = $data['key_type'];
+        $this->properties = $data['properties'];
 
         $this->setConnection(null);
     }

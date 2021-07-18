@@ -92,6 +92,16 @@ abstract class Model extends Query
         return null;
     }
 
+    public function __sleep()
+    {
+        return ['connection_class', 'table', 'primary_key', 'key_type', 'properties'];
+    }
+
+    public function __wakeup()
+    {
+        $this->setConnection(null);
+    }
+
     public function __serialize(): array
     {
         return $this->properties;
@@ -100,6 +110,8 @@ abstract class Model extends Query
     public function __unserialize(array $data): void
     {
         $this->properties = $data;
+
+        $this->setConnection(null);
     }
 
     private function load($id) {

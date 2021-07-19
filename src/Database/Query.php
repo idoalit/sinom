@@ -87,6 +87,11 @@ class Query
         return $this;
     }
 
+    function _isNotNull($column) {
+        $this->where['and'][] = [$column, 'is not null', null];
+        return $this;
+    }
+
     function _groupBy($columns) {
         if (is_array($columns)) {
             $this->columns = $columns;
@@ -245,6 +250,7 @@ class Query
                 $column = implode('.', array_map(function ($item) { return "`$item`"; }, explode('.', $where[0])));
 
                 if ($where[1] === 'is null') return "$column is null";
+                if ($where[1] === 'is not null') return "$column is not null";
 
                 $this->where_value[] = $where[2];
                 return $column . ' ' . $where[1] . ' ?';

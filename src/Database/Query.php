@@ -251,6 +251,7 @@ class Query
 
                 if ($where[1] === 'is null') return "$column is null";
                 if ($where[1] === 'is not null') return "$column is not null";
+                if ($where[1] === 'in') return "$column in (".implode(', ', $where[2]).")";
 
                 $this->where_value[] = $where[2];
                 return $column . ' ' . $where[1] . ' ?';

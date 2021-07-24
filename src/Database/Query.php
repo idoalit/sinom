@@ -216,6 +216,7 @@ class Query
     }
 
     private function sanitizeColumn($column) {
+        if(strpos($column, '(') !== false) return $column;
         return implode('.', array_map(function ($item) { return "`$item`"; }, explode('.', $column)));
     }
 

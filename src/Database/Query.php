@@ -211,7 +211,7 @@ class Query
     private function buildColumn()
     {
         if (is_null($this->columns) || empty($this->columns)) return '*';
-        if ($this->columns[0] ?? '' === '*') return '*';
+        if (($this->columns[0] ?? '') === '*') return '*';
         return implode(', ', array_map(function ($item, $key) {
             $item = str_replace('`', '', $item);
             if (is_int($key)) return '`' . $item . '`';

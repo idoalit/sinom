@@ -208,20 +208,24 @@ class Query
 
     }
 
+    private function sanitizeColumn($column) {
+        return implode('.', array_map(function ($item) { return "`$item`"; }, explode('.', $column)));
+    }
+
     private function buildColumn()
     {
         if (is_null($this->columns) || empty($this->columns)) return '*';
         if (($this->columns[0] ?? '') === '*') return '*';
         return implode(', ', array_map(function ($item, $key) {
             $item = str_replace('`', '', $item);
-            if (is_int($key)) return '`' . $item . '`';
+            if (is_int($key)) return $this->sanitizeColumn($item);
             $key = str_replace('`', '', $key);
 
             // it's a function
             if(strpos($key, '(') !== false) return $key . ' AS `' . $item . '`';
             
             // normal column
-            return '`' . $key . '` AS `' . $item . '`';
+            return $this->sanitizeColumn($key) . ' AS `' . $item . '`';
         }, $this->columns, array_keys($this->columns)));
     }
 
@@ -247,7 +251,7 @@ class Query
             if ($where !== '') $where .= $sparator;
             $where .= implode($sparator, array_map(function ($where) {
 
-                $column = implode('.', array_map(function ($item) { return "`$item`"; }, explode('.', $where[0])));
+                $column = $this->sanitizeColumn($where[0]);
 
                 if ($where[1] === 'is null') return "$column is null";
                 if ($where[1] === 'is not null') return "$column is not null";

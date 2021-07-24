@@ -30,6 +30,7 @@ class Query
     private $join;
     private $where;
     private $where_value = [];
+    private $rawWhere;
     private $group;
     private $order;
     private $limit = 10;
@@ -73,6 +74,12 @@ class Query
     function _where($column, $operator = '=', $value = null)
     {
         $this->where['and'][] = [$column, $operator, $value];
+        return $this;
+    }
+
+    function _rawWhere($criteria)
+    {
+        $this->rawWhere = $criteria;
         return $this;
     }
 
@@ -264,6 +271,8 @@ class Query
                 return $column . ' ' . $where[1] . ' ?';
             }, $item));
         }
+
+        if(!is_null($this->rawWhere)) $where .= ' ' . $this->rawWhere;
 
         return $where;
     }

@@ -36,11 +36,11 @@ use Idoalit\Sinom\Supports\Text;
  * @method static Model isNull($column)
  * @method static Model groupBy($columns)
  * @method static Model orderBy($column, $order = 'asc')
+ * @method static array all($columns = [])
  *
  * @method count($column = '*')
  * @method get()
  * @method first()
- * @method all($columns = [])
  */
 abstract class Model extends Query
 {

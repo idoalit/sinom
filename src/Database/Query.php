@@ -291,4 +291,8 @@ class Query
             return $item[0] . ' ' . $item[1];
         }, $this->order));
     }
+
+    protected function getColumns() {
+        return $this->columns;
+    }
 }

@@ -1,5 +1,5 @@
 <?php
-namespace Idoalit\Sinom\Views\DataList;
+namespace Idoalit\Sinom\Views\DataTable;
 
 class Options {
     public $table_class = 'table';

@@ -1,12 +1,12 @@
 <?php
-namespace Idoalit\Sinom\Views\DataList;
+namespace Idoalit\Sinom\Views\DataTable;
 
-trait DataList {
+trait DataTable {
     private $modifyColumns = [];
     private $modifyHeaders = [];
     private $options;
 
-    function _datalist(Options $options = null)
+    function _dataTable(Options $options = null)
     {
         $this->options = $options ?? new Options;
         return $this->buildTable();

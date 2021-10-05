@@ -32,5 +32,9 @@ abstract class Form
 
     abstract function textarea($label, $name, $value);
 
+    abstract function file($label, $name, $multiple = false, $accepts = []);
+
+    abstract function fileList($label, $urlPopup, $urlList);
+
     abstract function datalist($label, $urlPopup, $urlList);
 }

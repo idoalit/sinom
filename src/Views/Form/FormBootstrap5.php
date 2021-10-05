@@ -28,13 +28,14 @@ class FormBootstrap5 extends Form
 {
     protected $method;
     protected $action;
-    protected $entype;
+    protected $name;
+    protected $enctype;
 
-    public function __construct($method, $action, $enctype = null)
+    public function __construct($method, $action, $name = 'sinomForm')
     {
         $this->method = $method;
         $this->action = $action;
-        $this->entype = $enctype;
+        $this->name = $name;
     }
 
     function text($label, $name, $value, $placeholder = '')
@@ -58,6 +59,27 @@ HTML;
 
     }
 
+    function file($label, $name, $multiple = false, $accepts = []) {
+        $this->enctype = 'multipart/form-data';
+        $multiple_str = '';
+        if($multiple) {
+            $name = str_replace(['[',']'], '', $name);
+            $name = trim($name) . '[]';
+            $multiple_str = 'multiple';
+        }
+        $accept_ext = implode(',', $accepts);
+        $accept_str = !empty($accepts) ? 'accept="'.$accept_ext.'"' : '';
+        $this->inputs[] = <<<HTML
+        <div class="mb-3">
+            <label for="formFile" class="form-label">{$label}</label>
+            <input class="form-control" type="file" id="formFile" name="{$name}" {$multiple_str} {$accept_str}/>
+        </div>
+HTML;
+
+    }
+
+    function fileList($label, $urlPopup, $urlList) {}
+
     function datalist($label, $urlPopup, $urlList)
     {
         $id_iframe = 'datalist--' . strtolower(str_replace(' ', '-', $label));
@@ -77,10 +99,11 @@ HTML;
 
     function build($print = false): string
     {
+        $enctype = !is_null($this->enctype) ? 'enctype="'.$this->enctype.'"' : '';
         $str = <<<HTML
-<form action="{$this->action}" method="{$this->method}">
+<form action="{$this->action}" method="{$this->method}" {$enctype} name="{$this->name}">
 HTML;
-        $str .= CSRF::getHiddenInputString();
+        $str .= CSRF::getHiddenInputString($this->name);
         $str .= implode('', $this->inputs);
         $str .= '<button type="submit" class="btn btn-success">Submit</button>';
         $str .= '</form>';

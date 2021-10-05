@@ -149,8 +149,8 @@ HTML;
             $required = $required && $index < 1 ? 'required' : '';
             $radio_str .= <<<HTML
 <div class="form-check">
-    <input class="form-check-input" type="radio" name="{$name}" id="option-{$index}" value="{$option[0]}" {$checked} {$required} />
-    <label class="form-check-label" for="option-{$index}">
+    <input class="form-check-input" type="radio" name="{$name}" id="{$name}-{$index}" value="{$option[0]}" {$checked} {$required} />
+    <label class="form-check-label" for="{$name}-{$index}">
         {$option[1]}
     </label>
 </div>

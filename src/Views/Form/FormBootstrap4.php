@@ -2,7 +2,7 @@
 /**
  * @Created by          : Waris Agung Widodo (ido.alit@gmail.com)
  * @Date                : 9/10/21 4:15 PM
- * @File name           : FormBootstrap5.php
+ * @File name           : FormBootstrap4.php
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ namespace Idoalit\Sinom\Views\Form;
 
 use Volnix\CSRF\CSRF;
 
-class FormBootstrap5 extends Form
+class FormBootstrap4 extends Form
 {
     protected $method;
     protected $action;
@@ -42,26 +42,60 @@ class FormBootstrap5 extends Form
     {
         $required = $required ? 'required' : '';
         $this->inputs[] = <<<HTML
-<div class="mb-3">
-  <label for="input-{$name}" class="form-label">{$label}</label>
-  <input type="text" class="form-control" id="input-{$name}" name="{$name}" placeholder="{$placeholder}" {$required}>
+<div class="form-group row">
+    <label for="input-{$name}" class="col-sm-2 col-form-label">{$label}</label>
+    <div class="col-sm-10">
+        <input type="text" class="form-control" id="input-{$name}" name="{$name}" placeholder="{$placeholder}" {$required}>
+    </div>
 </div>
 HTML;
     }
 
-    function date($label, $name, $value, $placeholder = '', $required = false) {}
+    function date($label, $name, $value, $placeholder = '', $required = false) {
+        $required = $required ? 'required' : '';
+        $this->inputs[] = <<<HTML
+<div class="form-group row">
+    <label for="input-{$name}" class="col-sm-2 col-form-label">{$label}</label>
+    <div class="col-sm-10">
+        <input type="date" class="form-control" id="input-{$name}" name="{$name}" placeholder="{$placeholder}" {$required}>
+    </div>
+</div>
+HTML;
+    }
 
-    function email($label, $name, $value, $placeholder = '', $required = false) {}
+    function email($label, $name, $value, $placeholder = '', $required = false) {
+        $required = $required ? 'required' : '';
+        $this->inputs[] = <<<HTML
+<div class="form-group row">
+    <label for="input-{$name}" class="col-sm-2 col-form-label">{$label}</label>
+    <div class="col-sm-10">
+        <input type="email" class="form-control" id="input-{$name}" name="{$name}" placeholder="{$placeholder}" {$required}>
+    </div>
+</div>
+HTML;
+    }
 
-    function password($label, $name, $value, $placeholder = '', $required = false) {}
+    function password($label, $name, $value, $placeholder = '', $required = false) {
+        $required = $required ? 'required' : '';
+        $this->inputs[] = <<<HTML
+<div class="form-group row">
+    <label for="input-{$name}" class="col-sm-2 col-form-label">{$label}</label>
+    <div class="col-sm-10">
+        <input type="password" class="form-control" id="input-{$name}" name="{$name}" placeholder="{$placeholder}" {$required}>
+    </div>
+</div>
+HTML;
+    }
 
     function textarea($label, $name, $value, $rows = 1, $required = false)
     {
         $required = $required ? 'required' : '';
         $this->inputs[] = <<<HTML
-<div class="mb-3">
-  <label for="input-{$name}" class="form-label">{$label}</label>
-  <textarea class="form-control" id="input-{$name}" name="{$name}" rows="{$rows}" {$required}>{$value}</textarea>
+<div class="form-group row">
+    <label for="input-{$name}" class="col-sm-2 col-form-label">{$label}</label>
+    <div class="col-sm-10">
+    <textarea class="form-control" id="input-{$name}" name="{$name}" rows="{$rows}" {$required}>{$value}</textarea>
+    </div>
 </div>
 HTML;
 
@@ -79,9 +113,11 @@ HTML;
         $accept_ext = implode(',', $accepts);
         $accept_str = !empty($accepts) ? 'accept="'.$accept_ext.'"' : '';
         $this->inputs[] = <<<HTML
-        <div class="mb-3">
-            <label for="formFile" class="form-label">{$label}</label>
+        <div class="form-group row">
+            <label for="input-{$name}" class="col-sm-2 col-form-label">{$label}</label>
+            <div class="col-sm-10">
             <input class="form-control" type="file" id="formFile" name="{$name}" {$multiple_str} {$accept_str} {$required}/>
+            </div>
         </div>
 HTML;
 
@@ -106,7 +142,31 @@ HTML;
 
     }
 
-    function radio($label, $name, $options, $default, $required = false) {}
+    function radio($label, $name, $options, $default, $required = false) {
+        $radio_str = '';
+        foreach($options as $index => $option) {
+            $checked = $default === $option[0] ? 'checked' : '';
+            $required = $required && $index < 1 ? 'required' : '';
+            $radio_str .= <<<HTML
+<div class="form-check">
+    <input class="form-check-input" type="radio" name="{$name}" id="option-{$index}" value="{$option[0]}" {$checked} {$required} />
+    <label class="form-check-label" for="option-{$index}">
+        {$option[1]}
+    </label>
+</div>
+HTML;
+        }
+
+        $this->inputs[] = <<<HTML
+<fieldset class="form-group row">
+    <legend class="col-form-label col-sm-2 float-sm-left pt-0">{$label}</legend>
+    <div class="col-sm-10">
+      {$radio_str}
+    </div>
+  </fieldset>
+HTML;
+
+    }
 
     function build($print = false): string
     {

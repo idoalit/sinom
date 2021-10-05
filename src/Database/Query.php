@@ -33,7 +33,7 @@ class Query
     private $rawWhere;
     private $group;
     private $order;
-    private $limit = 10;
+    private $limit = 100;
     private $offset = 0;
     private $sql;
     private $rows;

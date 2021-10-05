@@ -28,7 +28,13 @@ abstract class Form
 
     abstract function build();
 
-    abstract function text($label, $name, $value, $required = false);
+    abstract function text($label, $name, $value, $placeholder = '', $required = false);
+
+    abstract function date($label, $name, $value, $placeholder = '', $required = false);
+
+    abstract function email($label, $name, $value, $placeholder = '', $required = false);
+
+    abstract function password($label, $name, $value, $placeholder = '', $required = false);
 
     abstract function textarea($label, $name, $value, $required = false);
 
@@ -37,4 +43,6 @@ abstract class Form
     abstract function fileList($label, $urlPopup, $urlList);
 
     abstract function datalist($label, $urlPopup, $urlList);
+
+    abstract function radio($label, $name, $options, $default, $required = false);
 }

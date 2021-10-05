@@ -38,28 +38,31 @@ class FormBootstrap5 extends Form
         $this->name = $name;
     }
 
-    function text($label, $name, $value, $placeholder = '')
+    function text($label, $name, $value, $placeholder = '', $required = false)
     {
+        $required = $required ? 'required' : '';
         $this->inputs[] = <<<HTML
 <div class="mb-3">
   <label for="input-{$name}" class="form-label">{$label}</label>
-  <input type="text" class="form-control" id="input-{$name}" name="{$name}" placeholder="{$placeholder}">
+  <input type="text" class="form-control" id="input-{$name}" name="{$name}" placeholder="{$placeholder}" {$required}>
 </div>
 HTML;
     }
 
-    function textarea($label, $name, $value, $rows = 1)
+    function textarea($label, $name, $value, $rows = 1, $required = false)
     {
+        $required = $required ? 'required' : '';
         $this->inputs[] = <<<HTML
 <div class="mb-3">
   <label for="input-{$name}" class="form-label">{$label}</label>
-  <textarea class="form-control" id="input-{$name}" name="{$name}" rows="{$rows}">{$value}</textarea>
+  <textarea class="form-control" id="input-{$name}" name="{$name}" rows="{$rows}" {$required}>{$value}</textarea>
 </div>
 HTML;
 
     }
 
-    function file($label, $name, $multiple = false, $accepts = []) {
+    function file($label, $name, $multiple = false, $accepts = [], $required = false) {
+        $required = $required ? 'required' : '';
         $this->enctype = 'multipart/form-data';
         $multiple_str = '';
         if($multiple) {
@@ -72,7 +75,7 @@ HTML;
         $this->inputs[] = <<<HTML
         <div class="mb-3">
             <label for="formFile" class="form-label">{$label}</label>
-            <input class="form-control" type="file" id="formFile" name="{$name}" {$multiple_str} {$accept_str}/>
+            <input class="form-control" type="file" id="formFile" name="{$name}" {$multiple_str} {$accept_str} {$required}/>
         </div>
 HTML;
 

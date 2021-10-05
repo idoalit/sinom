@@ -28,11 +28,11 @@ abstract class Form
 
     abstract function build();
 
-    abstract function text($label, $name, $value);
+    abstract function text($label, $name, $value, $required = false);
 
-    abstract function textarea($label, $name, $value);
+    abstract function textarea($label, $name, $value, $required = false);
 
-    abstract function file($label, $name, $multiple = false, $accepts = []);
+    abstract function file($label, $name, $multiple = false, $accepts = [], $required = false);
 
     abstract function fileList($label, $urlPopup, $urlList);
 

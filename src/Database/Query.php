@@ -216,7 +216,10 @@ class Query
     }
 
     private function sanitizeColumn($column) {
-        if(strpos($column, '(') !== false) return $column;
+        $re = '/([a-zA-Z_{1}][a-zA-Z0-9_]+)(?=\()/m';
+        preg_match_all($re, $column, $matches, PREG_SET_ORDER, 0);
+        $functions = require_once __DIR__ . '/../Supports/mysql_function_name.php';
+        if(isset($matches[0]) && in_array($matches[0], $functions)) return $column;
         return implode('.', array_map(function ($item) { return "`$item`"; }, explode('.', $column)));
     }
 

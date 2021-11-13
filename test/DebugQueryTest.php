@@ -22,7 +22,8 @@
 
 class DebugQueryTest extends \PHPUnit\Framework\TestCase
 {
-    public function testDebugQueryReplacement() {
+    public function testDebugQueryReplacement()
+    {
         $connection = new \PDO('mysql:host=localhost;dbname=slims_v9', 'root', 'root');
         $biblio = new Biblio($connection);
         $biblio->title = 'This is title';
@@ -33,7 +34,8 @@ class DebugQueryTest extends \PHPUnit\Framework\TestCase
     }
 }
 
-class Biblio extends \Idoalit\Sinom\Database\Model {
+class Biblio extends \Idoalit\Sinom\Database\Model
+{
     protected $table = 'biblio';
     protected $primary_key = 'biblio_id';
 }

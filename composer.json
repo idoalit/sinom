@@ -14,5 +14,8 @@
             "email": "ido.alit@gmail.com"
         }
     ],
-    "require": {}
+    "require-dev": {
+        "phpunit/phpunit": "^9.5",
+        "ext-pdo": "*"
+    }
 }

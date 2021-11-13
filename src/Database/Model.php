@@ -53,6 +53,7 @@ abstract class Model extends Query
     protected $primary_key = 'id';
     protected $key_type = 'int';
     protected $properties = [];
+    protected $query_string;
 
     public function __construct($connection = null, $id = null)
     {
@@ -133,6 +134,18 @@ abstract class Model extends Query
         return $this;
     }
 
+    public function debugQuery($replaced = true) {
+        if (!$replaced) return $this->query_string;
+        return preg_replace_callback('/:([0-9a-z_]+)/i', [$this, 'debugReplace'], $this->query_string);
+    }
+
+    protected function debugReplace($m) {
+        $value = $this->properties[$m[1]];
+        if (is_null($value)) return 'NULL';
+        if (!is_numeric($value)) $value = str_replace("'", "''", $value);
+        return "'" . $value . "'";
+    }
+
     public function save()
     {
         if (!is_null($this->{$this->primary_key})) {
@@ -150,7 +163,9 @@ abstract class Model extends Query
             $exe_arr[':' . $key] = $value;
         }
 
-        $stmt = $this->connection->prepare("insert into `$this->table` ($column) values ($values)");
+        $this->query_string = "insert into `$this->table` ($column) values ($values)";
+
+        $stmt = $this->connection->prepare($this->query_string);
         $exe = $stmt->execute($exe_arr);
         if($this->debug) $stmt->debugDumpParams();
         if($exe) $this->{$this->primary_key} = $this->connection->lastInsertId();
@@ -171,7 +186,9 @@ abstract class Model extends Query
             $exe_arr[':' . $key] = $value;
         }
 
-        $stmt = $this->connection->prepare("update `$this->table` set $set_str where `$this->primary_key` = :$this->primary_key");
+        $this->query_string = "update `$this->table` set $set_str where `$this->primary_key` = :$this->primary_key";
+
+        $stmt = $this->connection->prepare($this->query_string);
         $exe = $stmt->execute($exe_arr);
         if($this->debug) $stmt->debugDumpParams();
         return $exe;

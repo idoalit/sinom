@@ -192,12 +192,8 @@ class Query
     {
         // prepare statement
         $sth = $this->connection->prepare($this->sql);
-        // bind parameter
-        foreach ($this->where_value as $key => $value) {
-            $sth->bindValue($key + 1, $value);
-        }
         // execute sql
-        $sth->execute();
+        $sth->execute($this->where_value);
         if($this->debug) $sth->debugDumpParams();
         return $sth;
     }
@@ -267,9 +263,6 @@ class Query
                 if ($where[1] === 'is null') return "$column is null";
                 if ($where[1] === 'is not null') return "$column is not null";
                 if ($where[1] === 'in') return "$column in (".implode(', ', $where[2]).")";
-
-                // it's a function
-                if(strpos($where[2], '(') !== false) return $column . ' ' . $where[1] . ' ' . $where[2];
 
                 $this->where_value[] = $where[2];
                 return $column . ' ' . $where[1] . ' ?';

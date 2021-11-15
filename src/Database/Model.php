@@ -1,8 +1,8 @@
 <?php
 /*
  * @Created by          : Waris Agung Widodo (ido.alit@gmail.com)
- * @Date                : Sun Jun 27 2021 02:04:14
- * @File name           : Model.php
+ * @Date                : Sun Jun 27 2021 02:09:01
+ * @File name           : Query.php
  *
  * The MIT License (MIT)
  * Copyright (c) 2021 Waris Agung Widodo
@@ -24,268 +24,271 @@
 
 namespace Idoalit\Sinom\Database;
 
-use Idoalit\Sinom\Supports\Text;
-
-/**
- * Class Model
- * @package Idoalit\Sinom\Database
- * @method static Model find($id)
- * @method static Model select($columns)
- * @method static Model join($table, $first, $operator, $second, $type = 'inner')
- * @method static Model where($column, $operator = '=', $value = null)
- * @method static Model isNull($column)
- * @method static Model groupBy($columns)
- * @method static Model orderBy($column, $order = 'asc')
- * @method static array all($columns = [])
- *
- * @method count($column = '*')
- * @method get()
- * @method first()
- */
-abstract class Model extends Query
+class Query
 {
-    /**
-     * @var \PDO|\mysqli
-     */
-    protected $connection;
-    protected $connection_class;
-    protected $table;
-    protected $primary_key = 'id';
-    protected $key_type = 'int';
-    protected $properties = [];
-    protected $query_string;
+    private $columns;
+    private $join;
+    private $where;
+    private $where_value = [];
+    private $rawWhere;
+    private $group;
+    private $order;
+    private $limit = 100;
+    private $offset = 0;
+    private $sql;
+    private $rows;
+    protected $debug = false;
 
-    public function __construct($connection = null, $id = null)
+    function _select($columns)
     {
-        // set default database connection
-        $this->setConnection($connection);
-
-        // set table
-        $this->setTable();
-
-        // load initial data if id not null
-        if (!is_null($id)) $this->load($id);
-    }
-
-    public function __set($name, $value)
-    {
-        $this->properties[$name] = $value;
-    }
-
-    public function __get($name)
-    {
-        if (isset($this->properties[$name])) return $this->properties[$name];
-        return null;
-    }
-
-    public function __call($method, $arguments)
-    {
-        $_method = '_' . $method;
-        if (method_exists($this, $_method)) return $this->$_method(...$arguments);
-        return null;
-    }
-
-    public static function __callStatic($method, $arguments)
-    {
-        $instance = new static;
-        $_method = '_' . $method;
-        if (method_exists($instance, $_method)) return $instance->$_method(...$arguments);
-        return null;
-    }
-
-    public function __sleep()
-    {
-        return ['connection_class', 'table', 'primary_key', 'key_type', 'properties'];
-    }
-
-    public function __wakeup()
-    {
-        $this->setConnection(null);
-    }
-
-    public function __serialize(): array
-    {
-        return [
-            'connection_class' => $this->connection_class, 
-            'table' => $this->table, 
-            'primary_key' => $this->primary_key, 
-            'key_type' => $this->key_type, 
-            'properties' => $this->properties
-        ];
-    }
-
-    public function __unserialize(array $data): void
-    {
-        $this->connection_class = $data['connection_class'];
-        $this->table = $data['table'];
-        $this->primary_key = $data['primary_key'];
-        $this->key_type = $data['key_type'];
-        $this->properties = $data['properties'];
-
-        $this->setConnection(null);
-    }
-
-    private function load($id) {
-        $query = $this->connection->query("SELECT * FROM $this->table WHERE $this->primary_key = $id");
-        if ($query->rowCount() < 1) return null;
-        foreach ($query->fetch(\PDO::FETCH_ASSOC) as $key => $value) {
-            $this->properties[$key] = $value;
+        if (is_array($columns)) {
+            $this->columns = $columns;
+            return $this;
         }
+        $this->columns = func_get_args();
         return $this;
     }
 
-    public function debugQuery($replaced = true) {
-        if (!$replaced) return $this->query_string;
-        return preg_replace_callback('/:([0-9a-z_]+)/i', [$this, 'debugReplace'], $this->query_string);
-    }
-
-    protected function debugReplace($m) {
-        $value = $this->properties[$m[1]];
-        if (is_null($value)) return 'NULL';
-        if (!is_numeric($value)) $value = str_replace("'", "''", $value);
-        return "'" . $value . "'";
-    }
-
-    public function save()
+    function _join($table, $first, $operator, $second, $type = 'inner')
     {
-        if (!is_null($this->{$this->primary_key})) {
-            return $this->update();
+        $this->join[] = [
+            'table' => $table,
+            'first' => $first,
+            'operator' => $operator,
+            'second' => $second,
+            'type' => $type
+        ];
+        return $this;
+    }
+
+    function _leftJoin($table, $first, $operator, $second)
+    {
+        return $this->_join($table, $first, $operator, $second, 'left');
+    }
+
+    function _rightJoin($table, $first, $operator, $second)
+    {
+        return $this->_join($table, $first, $operator, $second, 'right');
+    }
+
+    function _where($column, $operator = '=', $value = null)
+    {
+        $this->where['and'][] = [$column, $operator, $value];
+        return $this;
+    }
+
+    function _rawWhere($criteria)
+    {
+        $this->rawWhere = $criteria;
+        return $this;
+    }
+
+    function _whereOr($column, $operator = '=', $value = null)
+    {
+        $this->where['or'][] = [$column, $operator, $value];
+        return $this;
+    }
+
+    function _isNull($column) {
+        $this->where['and'][] = [$column, 'is null', null];
+        return $this;
+    }
+
+    function _isNotNull($column) {
+        $this->where['and'][] = [$column, 'is not null', null];
+        return $this;
+    }
+
+    function _groupBy($columns) {
+        if (is_array($columns)) {
+            $this->columns = $columns;
+            return $this;
         }
-        return $this->insert();
+        $this->group = func_get_args();
+        return $this;
     }
 
-    public function insert() {
-        $column = implode(', ', array_map(function($col){ return "`$col`"; }, array_keys($this->properties)));
-        $values = implode(', ', array_map(function($col){ return ":$col"; }, array_keys($this->properties)));
+    function _orderBy($column, $order = 'asc')
+    {
+        $this->order[] = [$column, $order];
+        return $this;
+    }
 
-        $exe_arr = [];
-        foreach ($this->properties as $key => $value) {
-            $exe_arr[':' . $key] = $value;
+    function _limit($limit)
+    {
+        $this->limit = $limit;
+        return $this;
+    }
+
+    function _offset($offset)
+    {
+        $this->offset = $offset;
+        return $this;
+    }
+
+    function _get()
+    {
+        // build sql first
+        $this->build();
+        // execute query
+        $sth = $this->execute();
+        // get rows
+        while ($row = $sth->fetchObject(get_class($this))) {
+            if (is_null($this->rows)) $this->rows = [];
+            $this->rows[] = $row;
         }
 
-        $this->query_string = "insert into `$this->table` ($column) values ($values)";
-
-        $stmt = $this->connection->prepare($this->query_string);
-        $exe = $stmt->execute($exe_arr);
-        if($this->debug) $stmt->debugDumpParams();
-        if($exe) $this->{$this->primary_key} = $this->connection->lastInsertId();
-        return $exe;
+        return $this->rows;
     }
 
-    public function update() {
-        $set_arr = [];
-        foreach ($this->properties as $col => $val) {
-            if ($col === $this->primary_key) continue;
-            $set_arr[] = "`$col` = :$col";
-        }
-
-        $set_str = implode(', ', $set_arr);
-
-        $exe_arr = [];
-        foreach ($this->properties as $key => $value) {
-            $exe_arr[':' . $key] = $value;
-        }
-
-        $this->query_string = "update `$this->table` set $set_str where `$this->primary_key` = :$this->primary_key";
-
-        $stmt = $this->connection->prepare($this->query_string);
-        $exe = $stmt->execute($exe_arr);
-        if($this->debug) $stmt->debugDumpParams();
-        return $exe;
-    }
-
-    public function delete()
+    function _count($column = '*')
     {
-        $stmt = $this->connection->prepare("delete from `$this->table` where `$this->primary_key` = :id");
-        $exe = $stmt->execute([':id' => $this->{$this->primary_key}]);
-        if($this->debug) $stmt->debugDumpParams();
-        return $exe;
+        // reset all column
+        $this->columns = [];
+        $this->_select(['count('.$column.')' => 'total']);
+        // execute
+        $result = $this->_first();
+        return $result->total;
     }
 
-    public function toArray()
+    function _first()
     {
-        return $this->properties;
+        // set limit just one
+        $this->limit = 1;
+        // build sql first
+        $this->build();
+        // execute query
+        $sth = $this->execute();
+        return $sth->fetchObject(get_class($this));
     }
 
-    public function toJson()
+    function _find($id)
     {
-        return json_encode($this->toArray());
+        // select by primary key
+        $this->_where($this->primary_key, '=', $id);
+        // get first
+        return $this->_first();
     }
 
-    /**
-     * @return mixed
-     */
-    public function getConnection()
+    function _all($columns = [])
     {
-        return $this->connection;
+        return $this->_get($columns);
     }
 
-    /**
-     * @param mixed $connection
-     */
-    public function setConnection($connection): void
+    function _sql() {
+        // build sql
+        $this->build();
+        // return it
+        return $this->sql;
+    }
+    
+    function _debug(bool $enabled = true)
     {
-        $this->connection = $connection;
-        if(is_null($this->connection) && !is_null($this->connection_class)) {
+        $this->debug = $enabled;
+        return $this;
+    }
+
+    private function execute()
+    {
+        // prepare statement
+        $sth = $this->connection->prepare($this->sql);
+        // execute sql
+        $sth->execute($this->where_value);
+        if($this->debug) $sth->debugDumpParams();
+        return $sth;
+    }
+
+    private function build()
+    {
+        $this->sql = 'select ' . $this->buildColumn();
+        $this->sql .= ' from `' . $this->table . '` ';
+        $this->sql .= $this->buildJoin();
+        if (($where = $this->buildWhere()) !== '') $this->sql .= ' where ' . $where;
+        if (($group = $this->buildGroup()) !== '') $this->sql .= ' group by ' . $group;
+        if (($order = $this->buildOrder()) !== '') $this->sql .= ' order by ' . $order;
+        $this->sql .= ' limit ' . $this->limit;
+        $this->sql .= ' offset ' . $this->offset;
+
+    }
+
+    private function sanitizeColumn($column) {
+        $re = '/([a-zA-Z_{1}][a-zA-Z0-9_]+)(?=\()/m';
+        preg_match_all($re, $column, $matches, PREG_SET_ORDER, 0);
+        $functions = require_once __DIR__ . '/../Supports/mysql_function_name.php';
+        if(isset($matches[0]) && in_array($matches[0], $functions)) return $column;
+        return implode('.', array_map(function ($item) { return "`$item`"; }, explode('.', $column)));
+    }
+
+    private function buildColumn()
+    {
+        if (is_null($this->columns) || empty($this->columns)) return '*';
+        if (($this->columns[0] ?? '') === '*') return '*';
+        return implode(', ', array_map(function ($item, $key) {
+            $item = str_replace('`', '', $item);
+            if (is_int($key)) return $this->sanitizeColumn($item);
+            $key = str_replace('`', '', $key);
+
+            // it's a function
+            if(strpos($key, '(') !== false) return $key . ' AS `' . $item . '`';
             
-            if (!is_array($this->connection_class)) {
-                $this->connection_class = [$this->connection_class, 'getInstance'];
+            // normal column
+            return $this->sanitizeColumn($key) . ' AS `' . $item . '`';
+        }, $this->columns, array_keys($this->columns)));
+    }
+
+    private function buildJoin()
+    {
+        $join_str = '';
+        if (!is_null($this->join)) {
+            foreach ($this->join as $join) {
+                $first = implode('.', array_map(function($item){ return "`{$item}`"; }, explode('.', $join['first'])));
+                $second = implode('.', array_map(function($item){ return "`{$item}`"; }, explode('.', $join['second'])));
+                $join_str .= "{$join['type']} join `{$join['table']}` on {$first} {$join['operator']} {$second} ";
             }
-            
-            $this->connection = call_user_func($this->connection_class);
         }
+        return $join_str;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getTable()
+    private function buildWhere()
     {
-        return $this->table;
-    }
+        if (is_null($this->where) || empty($this->where)) return '';
+        $where = '';
+        foreach ($this->where as $key => $item) {
+            $sparator = ' ' . $key . ' ';
+            if ($where !== '') $where .= $sparator;
+            $where .= implode($sparator, array_map(function ($where) {
 
-    /**
-     * @param mixed $table
-     */
-    public function setTable($table = null): void
-    {
-        if (is_null($this->table)) {
-            if (is_null($table)) {
-                $table = Text::unCamelCase((new \ReflectionClass($this))->getShortName()) . 's';
-            }
-            $this->table = $table;
+                $column = $this->sanitizeColumn($where[0]);
+
+                if ($where[1] === 'is null') return "$column is null";
+                if ($where[1] === 'is not null') return "$column is not null";
+                if ($where[1] === 'in') return "$column in (".implode(', ', $where[2]).")";
+
+                $this->where_value[] = $where[2];
+                return $column . ' ' . $where[1] . ' ?';
+            }, $item));
         }
+
+        if(!is_null($this->rawWhere)) $where .= ' ' . $this->rawWhere;
+
+        return $where;
     }
 
-    /**
-     * @return string
-     */
-    public function getPrimaryKey(): string
+    private function buildGroup()
     {
-        return $this->primary_key;
+        if (is_null($this->group) || empty($this->group)) return '';
+        return implode(', ', $this->group);
     }
 
-    /**
-     * @param string $primary_key
-     */
-    public function setPrimaryKey(string $primary_key): void
+    private function buildOrder()
     {
-        $this->primary_key = $primary_key;
+        if (is_null($this->order) || empty($this->order)) return '';
+        return implode(', ', array_map(function ($item) {
+            return $item[0] . ' ' . $item[1];
+        }, $this->order));
     }
 
-    /**
-     * @return string
-     */
-    public function getKeyType(): string
-    {
-        return $this->key_type;
-    }
-
-    /**
-     * @param string $key_type
-     */
-    public function setKeyType(string $key_type): void
-    {
-        $this->key_type = $key_type;
+    protected function getColumns() {
+        return $this->columns;
     }
 }
